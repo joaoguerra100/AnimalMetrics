@@ -7,5 +7,7 @@ namespace AnimalMetrics.Api.Services.Interface
     {
         Task<IEnumerable<DailyRecord>> GetRecordsByAnimalAsync(int animalId);
         Task<DailyRecord> CreateRecordAsync(CreateDailyRecordDto dto);
+        Task<MonthlySummaryDto> GetMonthlySummaryAsync(int animalId, int month, int year);
+
     }
 }

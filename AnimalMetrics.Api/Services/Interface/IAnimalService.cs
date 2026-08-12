@@ -7,5 +7,6 @@ namespace AnimalMetrics.Api.Services.Interface
     {
         Task<IEnumerable<Animal>> GetAllAnimalsAsync();
         Task<Animal> CreateAnimalAsync(CreateAnimalDto dto);
+        Task UpdateRationPriceAsync(int id, decimal price);
     }
 }

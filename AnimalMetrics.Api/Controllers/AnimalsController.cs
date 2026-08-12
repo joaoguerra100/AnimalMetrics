@@ -28,5 +28,13 @@ namespace AnimalMetrics.Api.Controllers
             var createdAnimal = await _service.CreateAnimalAsync(dto);
             return CreatedAtAction(nameof(GetAnimals), new { id = createdAnimal.Id }, createdAnimal);
         }
+
+        [HttpPut("{id}/ration-price")]
+        public async Task<IActionResult> UpdateRationPrice(int id, [FromBody] decimal price)
+        {
+            await _service.UpdateRationPriceAsync(id, price);
+
+            return NoContent();
+        }
     }
 }

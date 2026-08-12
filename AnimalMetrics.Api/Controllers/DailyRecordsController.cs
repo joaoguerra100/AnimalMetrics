@@ -22,6 +22,13 @@ namespace AnimalMetrics.Api.Controllers
             return Ok(await _service.GetRecordsByAnimalAsync(animalId));
         }
 
+        [HttpGet("animal/{animalId}/monthly-summary")]
+        public async Task<ActionResult<MonthlySummaryDto>> GetMontlySummary(int animalId, [FromQuery]int month, [FromQuery] int year)
+        {
+            var summary = await _service.GetMonthlySummaryAsync(animalId, month, year);
+            return Ok(summary);
+        }
+
         [HttpPost]
         public async Task<ActionResult<DailyRecord>> PostDailyRecord([FromBody] CreateDailyRecordDto dto)
         {

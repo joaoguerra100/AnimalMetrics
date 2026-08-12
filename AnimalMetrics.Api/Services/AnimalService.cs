@@ -30,5 +30,16 @@ namespace AnimalMetrics.Api.Services
 
             return await _repository.AddAsync(animal);
         }
+
+        public async Task UpdateRationPriceAsync(int id, decimal price)
+        {
+            var animal = await _repository.GetByIdAsync(id);
+
+            if(animal != null)
+            {
+                animal.RationPricePerKg = price;
+                await _repository.UpdateAsync(animal);
+            }
+        }
     }
 }

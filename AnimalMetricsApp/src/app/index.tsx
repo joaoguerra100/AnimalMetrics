@@ -1,39 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import api from '../services/api';
-
-interface Animal {
-  id: number;
-  name: string;
-  species: string;
-}
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
+import api from '@/services/api';
+import AnimalCard from '@/components/AnimalCard'; // Importando seu componente limpo
 
 export default function Home() {
-  const [animals, setAnimals] = useState<Animal[]>([]);
-  const router = useRouter();
+  const [animals, setAnimals] = useState<any[]>([]);
 
   useEffect(() => {
-    api.get('/animals')
-      .then(response => setAnimals(response.data))
-      .catch(error => console.error(error));
+    async function loadAnimals() {
+      try {
+        const response = await api.get('/animals');
+        setAnimals(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar animais", error);
+      }
+    }
+    loadAnimals();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: 'Meus Animais', headerShown: true }} />
+      <Text style={styles.title}>Meus Animais</Text>
       
       <FlatList
         data={animals}
-        keyExtractor={item => String(item.id)}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
-          <Pressable 
-            style={styles.card} 
-            onPress={() => router.push(`/animal/${item.id}?name=${item.name}` as any)}
-          >
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.species}>{item.species}</Text>
-          </Pressable>
+          <AnimalCard id={item.id} name={item.name} type={item.type} />
         )}
       />
     </View>
@@ -41,8 +34,6 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#121212' },
-  card: { backgroundColor: '#1e1e1e', padding: 20, marginBottom: 12, borderRadius: 12, borderLeftWidth: 5, borderLeftColor: '#4CAF50' },
-  name: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
-  species: { fontSize: 14, color: '#aaa', textTransform: 'capitalize' }
+  container: { flex: 1, backgroundColor: '#121212', padding: 20 },
+  title: { color: '#fff', fontSize: 24, fontWeight: 'bold', marginBottom: 20 }
 });

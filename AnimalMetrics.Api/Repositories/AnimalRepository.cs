@@ -19,9 +19,21 @@ namespace AnimalMetrics.Api.Repositories
             return await _context.Animals.ToListAsync();
         }
 
+        public async Task<Animal?> GetByIdAsync(int id)
+        {
+            return await _context.Animals.FindAsync(id);
+        }
+
         public async Task<Animal> AddAsync(Animal animal)
         {
             _context.Animals.Add(animal);
+            await _context.SaveChangesAsync();
+            return animal;
+        }
+
+        public async Task<Animal> UpdateAsync(Animal animal)
+        {
+            _context.Entry(animal).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return animal;
         }
