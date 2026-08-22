@@ -9,5 +9,10 @@ namespace AnimalMetrics.Api.Data
 
         public DbSet<Animal> Animals => Set<Animal>();
         public DbSet<DailyRecord> DailyRecords => Set<DailyRecord>();
+        public DbSet<Lote> Lotes { get; set; }
+        public DbSet<RegistroMortalidade> Mortalidades { get; set; }
+        public DbSet<Pesagem> Pesagens { get; set; }
+        public DbSet<RegistroNutricao> Nutricao { get; set; }
+        public DbSet<RegistroSanidade> Sanidade { get; set; }
     }
 }

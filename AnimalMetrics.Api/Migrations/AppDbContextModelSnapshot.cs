@@ -76,6 +76,158 @@ namespace AnimalMetrics.Api.Migrations
                     b.ToTable("DailyRecords");
                 });
 
+            modelBuilder.Entity("AnimalMetrics.Api.Models.Lote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("DataChegada")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Finalidade")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Linhagem")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("QuantidadeAtual")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeInicial")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Lotes");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.Pesagem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataRegistro")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("IdadeAvesDias")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LoteId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("PesoMedioGramas")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoteId");
+
+                    b.ToTable("Pesagens");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroMortalidade", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Causa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DatRegistro")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LoteId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeAves")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoteId");
+
+                    b.ToTable("Mortalidades");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroNutricao", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AguaLitros")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("DataRegistro")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("LoteId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("RacaoGramas")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoteId");
+
+                    b.ToTable("Nutricao");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroSanidade", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataAplicacao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Dosagem")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("LoteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("NomeProduto")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoteId");
+
+                    b.ToTable("Sanidade");
+                });
+
             modelBuilder.Entity("AnimalMetrics.Api.Models.DailyRecord", b =>
                 {
                     b.HasOne("AnimalMetrics.Api.Models.Animal", "Animal")
@@ -85,6 +237,50 @@ namespace AnimalMetrics.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Animal");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.Pesagem", b =>
+                {
+                    b.HasOne("AnimalMetrics.Api.Models.Lote", "Lote")
+                        .WithMany()
+                        .HasForeignKey("LoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lote");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroMortalidade", b =>
+                {
+                    b.HasOne("AnimalMetrics.Api.Models.Lote", "Lote")
+                        .WithMany()
+                        .HasForeignKey("LoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lote");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroNutricao", b =>
+                {
+                    b.HasOne("AnimalMetrics.Api.Models.Lote", "Lote")
+                        .WithMany()
+                        .HasForeignKey("LoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lote");
+                });
+
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroSanidade", b =>
+                {
+                    b.HasOne("AnimalMetrics.Api.Models.Lote", "Lote")
+                        .WithMany()
+                        .HasForeignKey("LoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lote");
                 });
 
             modelBuilder.Entity("AnimalMetrics.Api.Models.Animal", b =>

@@ -25,10 +25,23 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Reposutiruis
 builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
 builder.Services.AddScoped<IDailyRecordRepository, DailyRecordRepository>();
+builder.Services.AddScoped<ILoteRepository, LoteRepository>();
+builder.Services.AddScoped<IMortalidadeRepository, MortalidadeRepository>();
+builder.Services.AddScoped<IPesagemRepository, PesagemRepository>();
+builder.Services.AddScoped<INutricaoRepository, NutricaoRepository>();
+builder.Services.AddScoped<ISanidadeRepository, SanidadeRepository>();
+
+// Services
 builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<IDailyRecordService, DailyRecordService>();
+builder.Services.AddScoped<ILoteService, LoteService>();
+builder.Services.AddScoped<IMortalidadeService, MortalidadeService>();
+builder.Services.AddScoped<IPesagemService, PesagemService>();
+builder.Services.AddScoped<INutricaoService, NutricaoService>();
+builder.Services.AddScoped<ISanidadeService, SanidadeService>();
 
 var app = builder.Build();
 
