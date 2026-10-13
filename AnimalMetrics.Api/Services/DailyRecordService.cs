@@ -10,17 +10,19 @@ namespace AnimalMetrics.Api.Services
     public class DailyRecordService : IDailyRecordService
     {
         private readonly IDailyRecordRepository _repository;
+        private readonly ILoteRepository _loteRepository;
         private readonly AppDbContext _context;
 
-        public DailyRecordService(IDailyRecordRepository repository, AppDbContext context)
+        public DailyRecordService(IDailyRecordRepository repository, AppDbContext context, ILoteRepository loteRepository)
         {
             _repository = repository;
             _context = context;
+            _loteRepository = loteRepository;
         }
 
-        public async Task<IEnumerable<DailyRecord>> GetRecordsByAnimalAsync(int animalId)
+        public async Task<IEnumerable<DailyRecord>> GetByLoteIdAsync(int loteId)
         {
-            return await _repository.GetByAnimalIdAsync(animalId);
+            return await _repository.GetByLoteIdAsync(loteId);
         }
 
         public async Task<DailyRecord> CreateRecordAsync(CreateDailyRecordDto dto)
@@ -30,7 +32,7 @@ namespace AnimalMetrics.Api.Services
                 ? DateTime.SpecifyKind(dto.RecordDate.Value.Date, DateTimeKind.Utc)
                 : DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
 
-            var existingRecord = await _repository.GetByAnimalAndDateAsync(dto.AnimalId, targetDate);
+            var existingRecord = await _repository.GetByLoteAndDateAsync(dto.LoteId, targetDate);
 
             if (existingRecord != null)
             {
@@ -42,7 +44,7 @@ namespace AnimalMetrics.Api.Services
 
             var record = new DailyRecord
             {
-                AnimalId = dto.AnimalId,
+                LoteId = dto.LoteId,
                 FoodGiven = dto.FoodGiven,
                 CurrentWeight = dto.CurrentWeight,
                 RecordDate = targetDate // Salva a meia-noite limpa em UTC
@@ -51,22 +53,22 @@ namespace AnimalMetrics.Api.Services
             return await _repository.AddAsync(record);
         }
 
-        public async Task<MonthlySummaryDto> GetMonthlySummaryAsync(int animalId, int month, int year)
+        public async Task<MonthlySummaryDto> GetMonthlySummaryByLoteAsync(int loteId, int month, int year)
         {
-            // Busca os registros do mês/ano específicos usando AsNoTracking para performance
-            var records = await _repository.GetByAnimalIdAsync(animalId);
+            // Busca os registros do mês/ano específicos usando o repositório atualizado
+            var records = await _repository.GetByLoteIdAsync(loteId);
+
             var targetRecords = records
                 .Where(r => r.RecordDate.Month == month && r.RecordDate.Year == year)
                 .OrderBy(r => r.RecordDate)
                 .ToList();
 
-            // Busca o animal para saber o preço da ração (usando AsNoTracking)
-            var animal = await _context.Animals.AsNoTracking().FirstOrDefaultAsync(a => a.Id == animalId);
-            decimal rationPriceKg = animal?.RationPricePerKg ?? 0;
+            // Busca o lote pelo repositório injetado para pegar o preço
+            var lote = await _loteRepository.ObterPorIdAsync(loteId);
+            decimal rationPriceKg = lote?.RationPrice ?? 0;
 
             // Calcula os totais
             decimal totalGrams = targetRecords.Sum(r => r.FoodGiven);
-            // Fórmula: (Gramas totais / 1000) = Kg totais * Preço do Kg
             decimal totalCost = (totalGrams / 1000m) * rationPriceKg;
 
             // Monta a lista dia a dia para o gráfico

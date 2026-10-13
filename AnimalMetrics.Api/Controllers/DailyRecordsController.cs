@@ -16,24 +16,25 @@ namespace AnimalMetrics.Api.Controllers
             _service = service;
         }
 
-        [HttpGet("animal/{animalId}")]
-        public async Task<ActionResult<IEnumerable<DailyRecord>>> GetRecordsByAnimal(int animalId)
+        [HttpGet("lote/{loteId}")]
+        public async Task<IActionResult> GetByLote(int loteId)
         {
-            return Ok(await _service.GetRecordsByAnimalAsync(animalId));
+            var records = await _service.GetByLoteIdAsync(loteId);
+            return Ok(records);
         }
 
-        [HttpGet("animal/{animalId}/monthly-summary")]
-        public async Task<ActionResult<MonthlySummaryDto>> GetMontlySummary(int animalId, [FromQuery]int month, [FromQuery] int year)
+        [HttpGet("lote/{loteId}/monthly-summary")]
+        public async Task<IActionResult> GetMonthlySummary(int loteId, [FromQuery] int month, [FromQuery] int year)
         {
-            var summary = await _service.GetMonthlySummaryAsync(animalId, month, year);
+            var summary = await _service.GetMonthlySummaryByLoteAsync(loteId, month, year);
             return Ok(summary);
         }
 
         [HttpPost]
-        public async Task<ActionResult<DailyRecord>> PostDailyRecord([FromBody] CreateDailyRecordDto dto)
+        public async Task<IActionResult> PostDailyRecord([FromBody] CreateDailyRecordDto dto)
         {
-            var createdRecord = await _service.CreateRecordAsync(dto);
-            return CreatedAtAction(nameof(GetRecordsByAnimal), new { animalId = createdRecord.AnimalId }, createdRecord);
+            var created = await _service.CreateRecordAsync(dto);
+            return CreatedAtAction(nameof(GetByLote), new { loteId = created.LoteId }, created);
         }
     }
 }

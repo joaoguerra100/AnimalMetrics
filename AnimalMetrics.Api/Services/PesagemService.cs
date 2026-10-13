@@ -23,7 +23,7 @@ namespace AnimalMetrics.Api.Services
             var tempoDeVida = pesagem.DataRegistro.Date - lote.DataChegada.Date;
             pesagem.IdadeAvesDias = tempoDeVida.Days;
 
-            if(pesagem.IdadeAvesDias < 0)
+            if (pesagem.IdadeAvesDias < 0)
                 throw new Exception("A data da pesagem não pode ser anterior à data de chegada do lote.");
 
             return await _pesagemRepository.AdicionarAsync(pesagem);
@@ -32,6 +32,28 @@ namespace AnimalMetrics.Api.Services
         public async Task<IEnumerable<Pesagem>> ObterHistoricoAsync(int loteId)
         {
             return await _pesagemRepository.ObterHistoricoPorLoteAsync(loteId);
+        }
+
+        public async Task<Pesagem> AtualizarPesagemAsync(int id, Pesagem pesagemAtualizada)
+        {
+            // 1. Busca a pesagem original no banco
+            var pesagemExistente = await _pesagemRepository.GetByIdAsync(id);
+
+            if (pesagemExistente == null)
+            {
+                throw new KeyNotFoundException("Pesagem não encontrada.");
+            }
+
+            // 2. Atualiza apenas os dados permitidos
+            pesagemExistente.PesoMedioGramas = pesagemAtualizada.PesoMedioGramas;
+            pesagemExistente.DataRegistro = pesagemAtualizada.DataRegistro;
+            // Se você for usar IdadeAvesDias no futuro, atualize aqui também:
+            // pesagemExistente.IdadeAvesDias = pesagemAtualizada.IdadeAvesDias;
+
+            // 3. Salva no banco
+            await _pesagemRepository.UpdateAsync(pesagemExistente);
+
+            return pesagemExistente;
         }
     }
 }

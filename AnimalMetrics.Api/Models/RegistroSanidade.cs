@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
 namespace AnimalMetrics.Api.Models
 {
     public class RegistroSanidade
@@ -9,6 +12,8 @@ namespace AnimalMetrics.Api.Models
         public string NomeProduto { get; set; } // Ex: "NewCastle", "Amoxicilina"
         public string Dosagem { get; set; } // Ex: "10ml/L", "Gota Ocular"
 
-        public Lote Lote { get; set; }
+        [ValidateNever]
+        [JsonIgnore]
+        public Lote? Lote { get; set; }
     }
 }

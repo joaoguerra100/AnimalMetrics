@@ -4,8 +4,8 @@ namespace AnimalMetrics.Api.Repositories.Interface
 {
     public interface IDailyRecordRepository
     {
-        Task<IEnumerable<DailyRecord>> GetByAnimalIdAsync(int animalId);
-        Task<DailyRecord?> GetByAnimalAndDateAsync(int animalId, DateTime date);
+        Task<IEnumerable<DailyRecord>> GetByLoteIdAsync(int loteId);
+        Task<DailyRecord?> GetByLoteAndDateAsync(int loteId, DateTime date);
         Task<DailyRecord> AddAsync(DailyRecord record);
         Task<DailyRecord> UpdateAsync(DailyRecord record);
     }

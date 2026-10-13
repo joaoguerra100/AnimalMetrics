@@ -20,5 +20,16 @@ namespace AnimalMetrics.Api.Controllers
             try { return Ok(await _sanidadeService.RegistrarSanidadeAsync(registro)); }
             catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AtualizarSanidade(int id, [FromBody] RegistroSanidade registro)
+        {
+            try
+            {
+                return Ok(await _sanidadeService.AtualizarSanidadeAsync(id, registro));
+            }
+            catch (KeyNotFoundException ex) { return NotFound(new { mensagem = ex.Message }); }
+            catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
+        }
     }
 }

@@ -16,7 +16,9 @@ namespace AnimalMetrics.Api.Repositories
 
         public async Task<IEnumerable<Lote>> ObterTodosAsync()
         {
-            return await _context.Lotes.AsNoTracking().ToListAsync();
+            return await _context.Lotes
+                        .OrderBy(l => l.Id)
+                        .ToListAsync();
         }
 
         public async Task<Lote?> ObterPorIdAsync(int id)
@@ -35,6 +37,16 @@ namespace AnimalMetrics.Api.Repositories
         {
             _context.Lotes.Update(lote);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task DeletarAsync(int id)
+        {
+            var lote = await _context.Lotes.FindAsync(id);
+            if (lote != null)
+            {
+                _context.Lotes.Remove(lote);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

@@ -28,5 +28,28 @@ namespace AnimalMetrics.Api.Services
 
         public async Task<IEnumerable<RegistroSanidade>> ObterHistoricoAsync(int loteId) =>
             await _sanidadeRepo.ObterHistoricoPorLoteAsync(loteId);
+
+        public async Task<RegistroSanidade> AtualizarSanidadeAsync(int id, RegistroSanidade sanidadeAtualizada)
+        {
+            // 1. Busca o registro de sanidade original no banco
+            var sanidadeExistente = await _sanidadeRepo.GetByIdAsync(id);
+
+            if (sanidadeExistente == null)
+            {
+                throw new KeyNotFoundException("Registro de sanidade não encontrado.");
+            }
+
+            // 2. Atualiza apenas os dados permitidos
+            sanidadeExistente.DataAplicacao = sanidadeAtualizada.DataAplicacao;
+            sanidadeExistente.Tipo = sanidadeAtualizada.Tipo;
+            sanidadeExistente.NomeProduto = sanidadeAtualizada.NomeProduto;
+            sanidadeExistente.Dosagem = sanidadeAtualizada.Dosagem;
+
+            // 3. Salva no banco
+            await _sanidadeRepo.UpdateAsync(sanidadeExistente);
+
+            // 4. Retorna o registro atualizado para o Controller devolver ao Front-end
+            return sanidadeExistente;
+        }
     }
 }

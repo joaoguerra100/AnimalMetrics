@@ -4,7 +4,8 @@ namespace AnimalMetrics.Api.Services.Interface
 {
     public interface IPesagemService
     {
-        Task<Pesagem> RegistrarPesagemAsync(Pesagem pesagem);
         Task<IEnumerable<Pesagem>> ObterHistoricoAsync(int loteId);
+        Task<Pesagem> RegistrarPesagemAsync(Pesagem pesagem);
+        Task<Pesagem> AtualizarPesagemAsync(int id, Pesagem pesagemAtualizada);
     }
 }

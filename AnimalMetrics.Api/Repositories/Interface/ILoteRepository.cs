@@ -8,5 +8,6 @@ namespace AnimalMetrics.Api.Repositories.Interface
         Task<Lote?> ObterPorIdAsync(int id);
         Task<Lote> AdicionarAsync(Lote lote);
         Task AtualizarAsync(Lote lote);
+        Task DeletarAsync(int id);
     }
 }

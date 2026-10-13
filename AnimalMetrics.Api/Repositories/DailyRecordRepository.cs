@@ -14,23 +14,17 @@ public class DailyRecordRepository : IDailyRecordRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<DailyRecord>> GetByAnimalIdAsync(int animalId)
+    public async Task<IEnumerable<DailyRecord>> GetByLoteIdAsync(int loteId)
     {
         return await _context.DailyRecords
-            .AsNoTracking()
-            .Where(r => r.AnimalId == animalId)
-            .OrderByDescending(r => r.RecordDate)
-            .ToListAsync();
+                .Where(r => r.LoteId == loteId)
+                .ToListAsync();
     }
 
-    public async Task<DailyRecord?> GetByAnimalAndDateAsync(int animalId, DateTime date)
+    public async Task<DailyRecord?> GetByLoteAndDateAsync(int loteId, DateTime date)
     {
         return await _context.DailyRecords
-            .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.AnimalId == animalId && 
-                                      r.RecordDate.Year == date.Year &&
-                                      r.RecordDate.Month == date.Month &&
-                                      r.RecordDate.Day == date.Day);
+                .FirstOrDefaultAsync(r => r.LoteId == loteId && r.RecordDate.Date == date.Date);
     }
 
     public async Task<DailyRecord> AddAsync(DailyRecord record)

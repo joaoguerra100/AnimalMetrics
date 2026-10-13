@@ -10,5 +10,6 @@ namespace AnimalMetrics.Api.Models
         public string Linhagem { get; set; }
         public string Finalidade { get; set; }
         public bool Ativo { get; set; } = true;
+        public decimal RationPrice { get; set; }
     }
 }

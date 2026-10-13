@@ -15,6 +15,12 @@ namespace AnimalMetrics.Api.Controllers
             _service = service;
         }
 
+        [HttpGet("lote/{loteId}")]
+        public async Task<IActionResult> ObterHistorico(int loteId)
+        {
+            return Ok(await _service.ObterHistoricoAsync(loteId));
+        }
+
         [HttpPost]
         public async Task<IActionResult> RegistrarBaixa([FromBody] RegistroMortalidade registro)
         {
@@ -27,6 +33,14 @@ namespace AnimalMetrics.Api.Controllers
             {
                 return BadRequest(new { mensagem = ex.Message });
             }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AtualizarBaixa(int id, [FromBody] RegistroMortalidade registro)
+        {
+            try { return Ok(await _service.AtualizarPerdaAsync(id, registro)); }
+            catch (KeyNotFoundException ex) { return NotFound(new { mensagem = ex.Message }); }
+            catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
         }
     }
 }

@@ -14,6 +14,11 @@ namespace AnimalMetrics.Api.Repositories
             _context = context;
         }
 
+        public async Task<Pesagem?> GetByIdAsync(int id)
+        {
+            return await _context.Pesagens.FindAsync(id);
+        }
+
         public async Task<Pesagem> AdicionarAsync(Pesagem pesagem)
         {
             _context.Pesagens.Add(pesagem);
@@ -28,6 +33,12 @@ namespace AnimalMetrics.Api.Repositories
                 .OrderBy(p => p.DataRegistro)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+        public async Task UpdateAsync(Pesagem pesagem)
+        {
+            _context.Pesagens.Update(pesagem);
+            await _context.SaveChangesAsync();
         }
     }
 }

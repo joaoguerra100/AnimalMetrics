@@ -57,7 +57,7 @@ namespace AnimalMetrics.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AnimalId")
+                    b.Property<int?>("AnimalId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("CurrentWeight")
@@ -66,12 +66,17 @@ namespace AnimalMetrics.Api.Migrations
                     b.Property<decimal>("FoodGiven")
                         .HasColumnType("numeric");
 
+                    b.Property<int>("LoteId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("RecordDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AnimalId");
+
+                    b.HasIndex("LoteId");
 
                     b.ToTable("DailyRecords");
                 });
@@ -107,6 +112,9 @@ namespace AnimalMetrics.Api.Migrations
 
                     b.Property<int>("QuantidadeInicial")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("RationPrice")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
@@ -230,13 +238,17 @@ namespace AnimalMetrics.Api.Migrations
 
             modelBuilder.Entity("AnimalMetrics.Api.Models.DailyRecord", b =>
                 {
-                    b.HasOne("AnimalMetrics.Api.Models.Animal", "Animal")
+                    b.HasOne("AnimalMetrics.Api.Models.Animal", null)
                         .WithMany("DailyRecords")
-                        .HasForeignKey("AnimalId")
+                        .HasForeignKey("AnimalId");
+
+                    b.HasOne("AnimalMetrics.Api.Models.Lote", "Lote")
+                        .WithMany()
+                        .HasForeignKey("LoteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Animal");
+                    b.Navigation("Lote");
                 });
 
             modelBuilder.Entity("AnimalMetrics.Api.Models.Pesagem", b =>

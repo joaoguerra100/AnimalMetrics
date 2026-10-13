@@ -17,6 +17,11 @@ namespace AnimalMetrics.Api.Repositories
             return registro;
         }
 
+        public async Task<RegistroSanidade?> GetByIdAsync(int id)
+        {
+            return await _context.Sanidade.FindAsync(id);
+        }
+
         public async Task<IEnumerable<RegistroSanidade>> ObterHistoricoPorLoteAsync(int loteId)
         {
             return await _context.Sanidade
@@ -24,6 +29,12 @@ namespace AnimalMetrics.Api.Repositories
                 .OrderByDescending(s => s.DataAplicacao) // Ordena do mais recente para o mais antigo
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+        public async Task UpdateAsync(RegistroSanidade sanidade)
+        {
+            _context.Sanidade.Update(sanidade);
+            await _context.SaveChangesAsync();
         }
     }
 }

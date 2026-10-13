@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
 namespace AnimalMetrics.Api.Models
 {
     public class RegistroMortalidade
@@ -8,6 +11,8 @@ namespace AnimalMetrics.Api.Models
         public int QuantidadeAves { get; set; }
         public string Causa { get; set; } // Ex: "Calor", "Doença", "Desconhecida"
 
-        public Lote Lote { get; set; }
+        [ValidateNever]
+        [JsonIgnore]
+        public Lote? Lote { get; set; }
     }
 }

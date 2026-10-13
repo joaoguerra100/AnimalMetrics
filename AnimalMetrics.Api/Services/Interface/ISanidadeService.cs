@@ -6,5 +6,6 @@ namespace AnimalMetrics.Api.Services.Interface
     {
         Task<RegistroSanidade> RegistrarSanidadeAsync(RegistroSanidade registro);
         Task<IEnumerable<RegistroSanidade>> ObterHistoricoAsync(int loteId);
+        Task<RegistroSanidade> AtualizarSanidadeAsync(int id, RegistroSanidade sanidadeAtualizada);
     }
 }
