@@ -14,6 +14,11 @@ public class DailyRecordRepository : IDailyRecordRepository
         _context = context;
     }
 
+    public async Task<DailyRecord?> GetByIdAsync(int id)
+    {
+        return await _context.DailyRecords.FindAsync(id);
+    }
+
     public async Task<IEnumerable<DailyRecord>> GetByLoteIdAsync(int loteId)
     {
         return await _context.DailyRecords

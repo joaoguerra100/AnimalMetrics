@@ -36,5 +36,23 @@ namespace AnimalMetrics.Api.Controllers
             var created = await _service.CreateRecordAsync(dto);
             return CreatedAtAction(nameof(GetByLote), new { loteId = created.LoteId }, created);
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDailyRecord(int id, [FromBody] DailyRecord registroAtualizado)
+        {
+            try 
+            { 
+                var registroExistente = await _service.GetByIdAsync(id); // Precisa ter esse método no service/repo
+                if (registroExistente == null) return NotFound("Registro não encontrado.");
+
+                registroExistente.FoodGiven = registroAtualizado.FoodGiven;
+                registroExistente.WaterConsumed = registroAtualizado.WaterConsumed;
+                registroExistente.RecordDate = registroAtualizado.RecordDate;
+
+                await _service.UpdateAsync(registroExistente); // Precisa ter esse método no repo
+                return Ok(registroExistente); 
+            }
+            catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
+        }
     }
 }

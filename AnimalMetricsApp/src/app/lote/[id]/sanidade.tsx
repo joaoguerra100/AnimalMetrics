@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -9,9 +9,10 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import api from "@/services/api";
+import { Ionicons } from "@expo/vector-icons";
 
 LocaleConfig.locales["pt-br"] = {
   monthNames: [
@@ -59,9 +60,14 @@ LocaleConfig.defaultLocale = "pt-br";
 export default function SanidadeLote() {
   const { id, name } = useLocalSearchParams();
   const loteId = Array.isArray(id) ? Number(id[0]) : Number(id);
+  const router = useRouter();
 
   const [registros, setRegistros] = useState<any[]>([]);
   const [markedDates, setMarkedDates] = useState<any>({});
+
+  // Estados para ver informaçoes do mes especifico
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth() + 1);
+  const [viewYear, setViewYear] = useState(new Date().getFullYear());
 
   // Estados dos Filtros e Pesquisa
   const [filterTipo, setFilterTipo] = useState("Todos");
@@ -105,17 +111,32 @@ export default function SanidadeLote() {
     if (loteId) loadSanidade();
   }, [loteId]);
 
-  // Aplica os filtros, pesquisa e ordenação na lista original
-  const processados = registros
-    .filter((r) => filterTipo === "Todos" || r.tipo === filterTipo)
-    .filter((r) =>
-      r.nomeProduto.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a.dataAplicacao).getTime();
-      const dateB = new Date(b.dataAplicacao).getTime();
-      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-    });
+  // A MÁGICA ACONTECE AQUI: Juntamos todos os filtros em um só lugar de forma otimizada!
+  const processados = useMemo(() => {
+    return (
+      registros
+        // 1. Filtra primeiro pelo mês e ano do calendário
+        .filter((r) => {
+          if (!r.dataAplicacao) return false;
+          const [anoStr, mesStr] = r.dataAplicacao.split("T")[0].split("-");
+          return (
+            parseInt(mesStr) === viewMonth && parseInt(anoStr) === viewYear
+          );
+        })
+        // 2. Filtra pelas abinhas (Todos, Vacina, Medicamento)
+        .filter((r) => filterTipo === "Todos" || r.tipo === filterTipo)
+        // 3. Filtra pela barra de pesquisa
+        .filter((r) =>
+          r.nomeProduto.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+        // 4. Ordena (Mais Recente ou Mais Antigo)
+        .sort((a, b) => {
+          const dateA = new Date(a.dataAplicacao).getTime();
+          const dateB = new Date(b.dataAplicacao).getTime();
+          return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+        })
+    );
+  }, [registros, viewMonth, viewYear, filterTipo, searchQuery, sortOrder]);
 
   const openNewRecord = (dateString: string) => {
     setSelectedDate(dateString);
@@ -155,10 +176,8 @@ export default function SanidadeLote() {
       if (isEditing && recordId) {
         payload.id = recordId;
         await api.put(`/sanidade/${recordId}`, payload);
-        Alert.alert("Sucesso", "Registro atualizado!");
       } else {
         await api.post("/sanidade", payload);
-        Alert.alert("Sucesso", "Sanidade registrada!");
       }
 
       setModalVisible(false);
@@ -175,7 +194,28 @@ export default function SanidadeLote() {
   return (
     <View style={styles.container}>
       <Stack.Screen
-        options={{ title: `Sanidade - ${name || "Lote"}`, headerShown: true }}
+        options={{
+          title: `Sanidade - ${name || "Lote"}`,
+          headerStyle: { backgroundColor: '#121212' },
+          headerTintColor: '#fff',
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity
+              style={{ marginRight: 20 }}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  // Se tiver histórico (navegação normal), volta de onde veio
+                  router.back();
+                } else {
+                  // Se o histórico sumiu (deu F5), força a volta para a tela inicial
+                  router.replace("/");
+                }
+              }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </TouchableOpacity>
+          ),
+        }}
       />
 
       <ScrollView
@@ -196,6 +236,10 @@ export default function SanidadeLote() {
               monthTextColor: "#fff",
             }}
             onDayPress={(day: any) => openNewRecord(day.dateString)}
+            onMonthChange={(month: any) => {
+              setViewMonth(month.month);
+              setViewYear(month.year);
+            }}
           />
           <Text style={styles.hintText}>
             Toque em um dia para adicionar um registro
@@ -238,7 +282,7 @@ export default function SanidadeLote() {
           </ScrollView>
 
           <View style={styles.listHeader}>
-            <Text style={styles.sectionTitle}>Histórico de Aplicações</Text>
+            <Text style={styles.sectionTitle}>Histórico do Mês</Text>
             <TouchableOpacity
               onPress={() =>
                 setSortOrder(sortOrder === "desc" ? "asc" : "desc")
@@ -287,71 +331,81 @@ export default function SanidadeLote() {
         ) : (
           <View style={styles.emptyCard}>
             <Text style={styles.emptyText}>
-              Nenhum registro encontrado para este filtro.
+              Nenhum registro encontrado para este mês ou filtro.
             </Text>
           </View>
         )}
       </ScrollView>
 
-      {/* Modal de Cadastro/Edição */}
+      {/* Modal de Cadastro/Edição Atualizado com proteção de clique */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {isEditing ? "Editar Registro" : "Novo Registro"} -{" "}
-              {selectedDate.split("-").reverse().join("/")}
-            </Text>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+          />
+          <ScrollView
+            contentContainerStyle={styles.scrollCenter}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>
+                {isEditing ? "Editar Registro" : "Novo Registro"} -{" "}
+                {selectedDate.split("-").reverse().join("/")}
+              </Text>
 
-            <Text style={styles.label}>Tipo</Text>
-            <View style={styles.chipContainer}>
-              {tiposDisponiveis.map((t) => (
-                <TouchableOpacity
-                  key={t}
-                  style={[styles.chip, tipo === t && styles.chipSelected]}
-                  onPress={() => setTipo(t)}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      tipo === t && styles.chipTextSelected,
-                    ]}
+              <Text style={styles.label}>Tipo</Text>
+              <View style={styles.chipContainer}>
+                {tiposDisponiveis.map((t) => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[styles.chip, tipo === t && styles.chipSelected]}
+                    onPress={() => setTipo(t)}
                   >
-                    {t}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        tipo === t && styles.chipTextSelected,
+                      ]}
+                    >
+                      {t}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.label}>Nome do Produto (Ex: NewCastle)</Text>
+              <TextInput
+                style={styles.input}
+                value={nomeProduto}
+                onChangeText={setNomeProduto}
+                placeholder="Digite o nome..."
+                placeholderTextColor="#666"
+              />
+
+              <Text style={styles.label}>Dosagem (Ex: 10ml/L, 1 gota)</Text>
+              <TextInput
+                style={styles.input}
+                value={dosagem}
+                onChangeText={setDosagem}
+                placeholder="Digite a dosagem..."
+                placeholderTextColor="#666"
+              />
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={styles.cancelBtn}
+                  onPressIn={() => setModalVisible(false)}
+                >
+                  <Text style={styles.cancelBtnText}>Cancelar</Text>
                 </TouchableOpacity>
-              ))}
+                <TouchableOpacity style={styles.saveBtn} onPressIn={handleSave}>
+                  <Text style={styles.saveBtnText}>Salvar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-
-            <Text style={styles.label}>Nome do Produto (Ex: NewCastle)</Text>
-            <TextInput
-              style={styles.input}
-              value={nomeProduto}
-              onChangeText={setNomeProduto}
-              placeholder="Digite o nome..."
-              placeholderTextColor="#666"
-            />
-
-            <Text style={styles.label}>Dosagem (Ex: 10ml/L, 1 gota)</Text>
-            <TextInput
-              style={styles.input}
-              value={dosagem}
-              onChangeText={setDosagem}
-              placeholder="Digite a dosagem..."
-              placeholderTextColor="#666"
-            />
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.cancelBtnText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-                <Text style={styles.saveBtnText}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -446,7 +500,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  emptyText: { color: "#666" },
+  emptyText: { color: "#666", textAlign: "center" },
 
   // Badges (Etiquetas de cor)
   badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
@@ -455,14 +509,22 @@ const styles = StyleSheet.create({
   badgeVitamina: { backgroundColor: "rgba(76, 175, 80, 0.2)" }, // Verde
   badgeText: { color: "#fff", fontSize: 12, fontWeight: "bold" },
 
-  // Modal
+  // Modal Atualizado
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
+  },
+  scrollCenter: {
+    flexGrow: 1,
     justifyContent: "center",
     padding: 20,
   },
-  modalContent: { backgroundColor: "#1e1e1e", padding: 20, borderRadius: 12 },
+  modalContent: {
+    backgroundColor: "#1e1e1e",
+    padding: 20,
+    borderRadius: 12,
+    zIndex: 10,
+  },
   modalTitle: {
     color: "#fff",
     fontSize: 18,

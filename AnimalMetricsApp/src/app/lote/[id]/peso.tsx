@@ -10,10 +10,11 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { LineChart } from "react-native-chart-kit";
 import api from "@/services/api";
+import { Ionicons } from "@expo/vector-icons";
 
 // Configuração do calendário em Português
 LocaleConfig.locales["pt-br"] = {
@@ -62,6 +63,7 @@ LocaleConfig.defaultLocale = "pt-br";
 export default function PesoLote() {
   const { id, name } = useLocalSearchParams();
   const loteId = Array.isArray(id) ? Number(id[0]) : Number(id);
+  const router = useRouter();
 
   const [pesos, setPesos] = useState<any[]>([]);
   const [markedDates, setMarkedDates] = useState<any>({});
@@ -177,8 +179,29 @@ export default function PesoLote() {
 
   return (
     <ScrollView style={styles.container}>
-      <Stack.Screen
-        options={{ title: `Peso - ${name || "Lote"}`, headerShown: true }}
+      <Stack.Screen 
+        options={{ 
+          title: `Peso - ${name || "Lote"}`, 
+          headerStyle: { backgroundColor: '#121212' },
+          headerTintColor: '#fff',
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity 
+              style={{ marginRight: 20 }}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  // Se tiver histórico (navegação normal), volta de onde veio
+                  router.back();
+                } else {
+                  // Se o histórico sumiu (deu F5), força a volta para a tela inicial
+                  router.replace("/"); 
+                }
+              }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </TouchableOpacity>
+          )
+        }} 
       />
 
       <Text style={styles.sectionTitle}>Curva de Crescimento (g)</Text>

@@ -5,7 +5,8 @@ namespace AnimalMetrics.Api.Models.DTOs
         public int? Id { get; set; }
         public int LoteId { get; set; }
         public decimal FoodGiven { get; set; }
-        public decimal CurrentWeight { get; set; }
+        public decimal WaterConsumed { get; set; }
+        // public decimal CurrentWeight { get; set; }
         public DateTime? RecordDate { get; set; }
     }
 }

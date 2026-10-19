@@ -25,6 +25,11 @@ namespace AnimalMetrics.Api.Services
             return await _repository.GetByLoteIdAsync(loteId);
         }
 
+        public async Task<DailyRecord?> GetByIdAsync(int id)
+        {
+            return await _repository.GetByIdAsync(id);
+        }
+
         public async Task<DailyRecord> CreateRecordAsync(CreateDailyRecordDto dto)
         {
             // Pega a data enviada ou a atual, zerando horas, minutos e segundos
@@ -37,7 +42,7 @@ namespace AnimalMetrics.Api.Services
             if (existingRecord != null)
             {
                 existingRecord.FoodGiven = dto.FoodGiven;
-                existingRecord.CurrentWeight = dto.CurrentWeight;
+                // existingRecord.CurrentWeight = dto.CurrentWeight;
 
                 return await _repository.UpdateAsync(existingRecord);
             }
@@ -46,7 +51,8 @@ namespace AnimalMetrics.Api.Services
             {
                 LoteId = dto.LoteId,
                 FoodGiven = dto.FoodGiven,
-                CurrentWeight = dto.CurrentWeight,
+                WaterConsumed = dto.WaterConsumed,
+                // CurrentWeight = dto.CurrentWeight,
                 RecordDate = targetDate // Salva a meia-noite limpa em UTC
             };
 
@@ -85,6 +91,11 @@ namespace AnimalMetrics.Api.Services
                 RationPricePerKg = rationPriceKg,
                 DailyLabels = dailyData
             };
+        }
+
+        public async Task UpdateAsync(DailyRecord record)
+        {
+            await _repository.UpdateAsync(record);
         }
     }
 }

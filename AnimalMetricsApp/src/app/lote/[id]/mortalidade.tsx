@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -9,9 +9,10 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import api from "@/services/api";
+import { Ionicons } from "@expo/vector-icons";
 
 LocaleConfig.locales["pt-br"] = {
   monthNames: [
@@ -59,10 +60,15 @@ LocaleConfig.defaultLocale = "pt-br";
 export default function MortalidadeLote() {
   const { id, name } = useLocalSearchParams();
   const loteId = Array.isArray(id) ? Number(id[0]) : Number(id);
+  const router = useRouter();
 
   const [registros, setRegistros] = useState<any[]>([]);
   const [markedDates, setMarkedDates] = useState<any>({});
   const [totalPerdas, setTotalPerdas] = useState(0);
+
+  // Estados para ver informaçoes do mes especifico
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth() + 1);
+  const [viewYear, setViewYear] = useState(new Date().getFullYear());
 
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -172,13 +178,42 @@ export default function MortalidadeLote() {
     }
   };
 
+  const registrosFiltrados = useMemo(() => {
+    return registros.filter((item) => {
+      // Se for Mortalidade, use item.datRegistro. Se for Sanidade, use item.dataRegistro
+      const dataCampo = item.dataRegistro || item.datRegistro;
+      if (!dataCampo) return false;
+
+      const [anoStr, mesStr] = dataCampo.split("T")[0].split("-");
+      return parseInt(mesStr) === viewMonth && parseInt(anoStr) === viewYear;
+    });
+  }, [registros, viewMonth, viewYear]);
+
   return (
     <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          title: `Mortalidade - ${name || "Lote"}`,
+      <Stack.Screen 
+        options={{ 
+          title: `Mortalidade - ${name || "Lote"}`, 
+          headerStyle: { backgroundColor: '#121212' },
+          headerTintColor: '#fff',
           headerShown: true,
-        }}
+          headerLeft: () => (
+            <TouchableOpacity 
+              style={{ marginRight: 20 }}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  // Se tiver histórico (navegação normal), volta de onde veio
+                  router.back();
+                } else {
+                  // Se o histórico sumiu (deu F5), força a volta para a tela inicial
+                  router.replace("/"); 
+                }
+              }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </TouchableOpacity>
+          )
+        }} 
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -200,6 +235,10 @@ export default function MortalidadeLote() {
               dayTextColor: "#fff",
               monthTextColor: "#fff",
             }}
+            onMonthChange={(month: any) => {
+              setViewMonth(month.month);
+              setViewYear(month.year);
+            }}
             onDayPress={(day: any) => openNewRecord(day.dateString)}
           />
           <Text style={styles.hintText}>
@@ -209,7 +248,7 @@ export default function MortalidadeLote() {
 
         <Text style={styles.sectionTitle}>Histórico de Baixas</Text>
         {registros.length > 0 ? (
-          registros.map((item, index) => (
+          registrosFiltrados.map((item, index) => (
             <TouchableOpacity
               key={item.id || index}
               style={styles.recordCard}

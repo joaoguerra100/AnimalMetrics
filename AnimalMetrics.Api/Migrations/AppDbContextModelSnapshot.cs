@@ -60,9 +60,6 @@ namespace AnimalMetrics.Api.Migrations
                     b.Property<int?>("AnimalId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("CurrentWeight")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("FoodGiven")
                         .HasColumnType("numeric");
 
@@ -71,6 +68,9 @@ namespace AnimalMetrics.Api.Migrations
 
                     b.Property<DateTime>("RecordDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("WaterConsumed")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
@@ -148,6 +148,42 @@ namespace AnimalMetrics.Api.Migrations
                     b.ToTable("Pesagens");
                 });
 
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroManejo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CondicoesClimaticasOk")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("DataRegistro")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("EquipamentosInspecionados")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("EstruturaOk")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LimpezaRealizada")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LoteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Observacoes")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoteId");
+
+                    b.ToTable("Manejos");
+                });
+
             modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroMortalidade", b =>
                 {
                     b.Property<int>("Id")
@@ -174,33 +210,6 @@ namespace AnimalMetrics.Api.Migrations
                     b.HasIndex("LoteId");
 
                     b.ToTable("Mortalidades");
-                });
-
-            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroNutricao", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("AguaLitros")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("DataRegistro")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("LoteId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("RacaoGramas")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LoteId");
-
-                    b.ToTable("Nutricao");
                 });
 
             modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroSanidade", b =>
@@ -262,7 +271,7 @@ namespace AnimalMetrics.Api.Migrations
                     b.Navigation("Lote");
                 });
 
-            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroMortalidade", b =>
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroManejo", b =>
                 {
                     b.HasOne("AnimalMetrics.Api.Models.Lote", "Lote")
                         .WithMany()
@@ -273,7 +282,7 @@ namespace AnimalMetrics.Api.Migrations
                     b.Navigation("Lote");
                 });
 
-            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroNutricao", b =>
+            modelBuilder.Entity("AnimalMetrics.Api.Models.RegistroMortalidade", b =>
                 {
                     b.HasOne("AnimalMetrics.Api.Models.Lote", "Lote")
                         .WithMany()

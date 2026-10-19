@@ -8,12 +8,13 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Modal,
 } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { LineChart } from "react-native-chart-kit";
 import api from "@/services/api";
-import DailyModal from "@/components/DailyModal";
+import { Ionicons } from "@expo/vector-icons";
 
 LocaleConfig.locales["pt-br"] = {
   monthNames: [
@@ -61,6 +62,7 @@ LocaleConfig.defaultLocale = "pt-br";
 export default function AlimentacaoLote() {
   const { id, name } = useLocalSearchParams(); // Este 'id' é o ID do Lote direto da URL
   const loteId = Array.isArray(id) ? Number(id[0]) : Number(id);
+  const router = useRouter();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
@@ -106,7 +108,10 @@ export default function AlimentacaoLote() {
       setRecords(recordsData);
 
       const newMarks: any = {};
-      recordsData.forEach((record: any) => {
+
+      const registrosComRacao = recordsData.filter((r: any) => r.foodGiven > 0);
+
+      registrosComRacao.forEach((record: any) => {
         if (record.recordDate) {
           const dateKey = record.recordDate.split("T")[0];
           newMarks[dateKey] = { marked: true, dotColor: "#4CAF50" };
@@ -198,6 +203,9 @@ export default function AlimentacaoLote() {
         foodGiven: foodAmount,
         currentWeight: 0,
         recordDate: selectedDate,
+        waterConsumed:
+          records.find((r: any) => r.recordDate.split("T")[0] === selectedDate)
+            ?.waterConsumed || 0,
       };
 
       if (isEditing && recordId) {
@@ -227,7 +235,30 @@ export default function AlimentacaoLote() {
 
   return (
     <ScrollView style={styles.container}>
-      <Stack.Screen options={{ title: name as string, headerShown: true }} />
+      <Stack.Screen 
+        options={{ 
+          title: `Alimentação - ${name || "Lote"}`, 
+          headerStyle: { backgroundColor: '#121212' },
+          headerTintColor: '#fff',
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity 
+              style={{ marginRight: 20 }}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  // Se tiver histórico (navegação normal), volta de onde veio
+                  router.back();
+                } else {
+                  // Se o histórico sumiu (deu F5), força a volta para a tela inicial
+                  router.replace("/"); 
+                }
+              }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </TouchableOpacity>
+          )
+        }} 
+      />
 
       <View style={styles.dashboard}>
         <View style={styles.priceCard}>
@@ -324,15 +355,43 @@ export default function AlimentacaoLote() {
         />
       </View>
 
-      <DailyModal
-        visible={modalVisible}
-        selectedDate={selectedDate}
-        isEditing={isEditing}
-        rationAmount={rationAmount}
-        onChangeRationAmount={setRationAmount}
-        onClose={() => setModalVisible(false)}
-        onSave={handleSaveRecord}
-      />
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {isEditing ? "Editar Ração" : "Registrar Ração"} -{" "}
+              {selectedDate.split("-").reverse().join("/")}
+            </Text>
+
+            <Text style={styles.label}>Quantidade de Ração (g)</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              value={String(rationAmount)}
+              onChangeText={setRationAmount}
+              placeholder="Ex: 1500"
+              placeholderTextColor="#666"
+              autoFocus
+            />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPressIn={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.saveBtn}
+                onPressIn={handleSaveRecord}
+              >
+                <Text style={styles.saveBtnText}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -374,7 +433,45 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   summaryItem: { flex: 1, alignItems: "center" },
-  label: { color: "#aaa", fontSize: 12, marginBottom: 5 },
   value: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   chart: { marginVertical: 10, borderRadius: 12 },
+  // Estilos do Modal idênticos aos da Água
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "#1e1e1e",
+    padding: 20,
+    borderRadius: 12,
+  },
+  modalTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  label: { color: "#aaa", marginBottom: 8, fontSize: 14 },
+  input: {
+    backgroundColor: "#2a2a2a",
+    color: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  modalActions: { flexDirection: "row", justifyContent: "flex-end" },
+  cancelBtn: { padding: 12, marginRight: 10 },
+  cancelBtnText: { color: "#aaa", fontWeight: "bold", fontSize: 16 },
+  saveBtn: {
+    backgroundColor: "#4CAF50", // VERDE PARA COMBINAR COM ALIMENTAÇÃO
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  saveBtnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });

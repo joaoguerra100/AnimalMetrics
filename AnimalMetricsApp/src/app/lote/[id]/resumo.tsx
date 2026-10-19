@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { Ionicons } from "@expo/vector-icons"; // Para o ícone de calendário
 import api from "@/services/api";
@@ -60,6 +60,7 @@ LocaleConfig.defaultLocale = "pt-br";
 export default function DashboardInicio() {
   const { id, name } = useLocalSearchParams();
   const loteId = Array.isArray(id) ? Number(id[0]) : Number(id);
+  const router = useRouter();
 
   const [loading, setLoading] = useState(true);
 
@@ -151,8 +152,9 @@ export default function DashboardInicio() {
     );
     const consumoKg = consumoGramas / 1000;
     const gasto = consumoKg * precoRacao;
+    const consumoAgua = racoesFiltradas.reduce((acc, curr) => acc + (curr.waterConsumed || 0), 0);
 
-    return { ultimoPeso, totalMortes, consumoKg, gasto };
+    return { ultimoPeso, totalMortes, consumoKg, gasto, consumoAgua };
   }, [
     allPesos,
     allMortes,
@@ -185,8 +187,29 @@ export default function DashboardInicio() {
 
   return (
     <ScrollView style={styles.container}>
-      <Stack.Screen
-        options={{ title: `Painel - ${name || "Lote"}`, headerShown: true }}
+      <Stack.Screen 
+        options={{ 
+          title: `Resumo - ${name || "Lote"}`, 
+          headerStyle: { backgroundColor: '#121212' },
+          headerTintColor: '#fff',
+          headerShown: true,
+          headerLeft: () => (
+            <TouchableOpacity 
+              style={{ marginRight: 20 }}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  // Se tiver histórico (navegação normal), volta de onde veio
+                  router.back();
+                } else {
+                  // Se o histórico sumiu (deu F5), força a volta para a tela inicial
+                  router.replace("/"); 
+                }
+              }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+            </TouchableOpacity>
+          )
+        }} 
       />
 
       {/* Cabeçalho e Botão de Filtro */}
@@ -233,11 +256,19 @@ export default function DashboardInicio() {
           </View>
 
           <View style={[styles.card, { borderLeftColor: "#2196F3" }]}>
-            <Text style={styles.cardLabel}>Consumo {labelSufixo}</Text>
+            <Text style={styles.cardLabel}>Consumo Ração {labelSufixo}</Text>
             <Text style={styles.cardValue}>
               {resumo.consumoKg.toFixed(1)} <Text style={styles.unit}>kg</Text>
             </Text>
           </View>
+
+          <View style={[styles.card, { borderLeftColor: "#00BCD4" }]}>
+            <Text style={styles.cardLabel}>Água Consumida {labelSufixo}</Text>
+            <Text style={[styles.cardValue, { color: "#00BCD4" }]}>
+              {resumo.consumoAgua.toFixed(1)} <Text style={styles.unit}>L</Text>
+            </Text>
+          </View>
+          
         </View>
       )}
 

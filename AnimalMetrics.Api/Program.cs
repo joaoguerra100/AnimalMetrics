@@ -31,8 +31,8 @@ builder.Services.AddScoped<IDailyRecordRepository, DailyRecordRepository>();
 builder.Services.AddScoped<ILoteRepository, LoteRepository>();
 builder.Services.AddScoped<IMortalidadeRepository, MortalidadeRepository>();
 builder.Services.AddScoped<IPesagemRepository, PesagemRepository>();
-builder.Services.AddScoped<INutricaoRepository, NutricaoRepository>();
 builder.Services.AddScoped<ISanidadeRepository, SanidadeRepository>();
+builder.Services.AddScoped<IManejoRepository, ManejoRepository>();
 
 // Services
 builder.Services.AddScoped<IAnimalService, AnimalService>();
@@ -40,8 +40,9 @@ builder.Services.AddScoped<IDailyRecordService, DailyRecordService>();
 builder.Services.AddScoped<ILoteService, LoteService>();
 builder.Services.AddScoped<IMortalidadeService, MortalidadeService>();
 builder.Services.AddScoped<IPesagemService, PesagemService>();
-builder.Services.AddScoped<INutricaoService, NutricaoService>();
 builder.Services.AddScoped<ISanidadeService, SanidadeService>();
+builder.Services.AddScoped<ISanidadeService, SanidadeService>();
+builder.Services.AddScoped<IManejoService, ManejoService>();
 
 var app = builder.Build();
 
