@@ -40,9 +40,9 @@ O projeto foi construído focando em escalabilidade, manutenibilidade e uma óti
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="imagem_do_menu.png" width="200" />
-  <img src="imagem_do_dashboard.png" width="200" />
-  <img src="imagem_da_timeline.png" width="200" />
+  <img src="./Imgs/imagem_do_menu.png" width="200" />
+  <img src="./Imgs/imagem_do_dashboard.png" width="200" />
+  <img src="./Imgs/imagem_da_timeline.png" width="200" />
 </p>
 
 ---
