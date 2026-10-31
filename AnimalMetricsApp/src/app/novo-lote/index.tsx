@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import { Picker } from "@react-native-picker/picker";
 import api from "@/services/api";
 
 export default function NovoLote() {
@@ -21,31 +20,15 @@ export default function NovoLote() {
   const [nome, setNome] = useState("");
   const [dataChegada, setDataChegada] = useState("");
   const [quantidade, setQuantidade] = useState("");
-  const [linhagem, setLinhagem] = useState("");
   const [finalidade, setFinalidade] = useState("");
-  const [animalId, setAnimalId] = useState(""); // Novo estado para o ID do animal/tipo
-  
-  const [animaisList, setAnimaisList] = useState<any[]>([]); // Lista de animais disponíveis
+
   const [loading, setLoading] = useState(false);
 
-  // Carrega a lista de animais e, se houver ID, os dados do lote
   useEffect(() => {
-    carregarAnimais();
     if (loteId) {
       carregarDadosLote();
     }
   }, [loteId]);
-
-  const carregarAnimais = async () => {
-    try {
-      // Ajuste a rota caso seu endpoint de animais seja diferente (ex: /animals)
-      const response = await api.get("/animals");
-      setAnimaisList(response.data || []);
-    } catch (error) {
-      console.error("Erro ao carregar animais:", error);
-      Alert.alert("Aviso", "Não foi possível carregar a lista de tipos de animais.");
-    }
-  };
 
   const carregarDadosLote = async () => {
     try {
@@ -55,9 +38,7 @@ export default function NovoLote() {
 
       setNome(lote.nome);
       setQuantidade(String(lote.quantidadeInicial));
-      setLinhagem(lote.linhagem);
       setFinalidade(lote.finalidade);
-      setAnimalId(String(lote.animalId || lote.animal?.id || ""));
 
       if (lote.dataChegada) {
         const dataPura = lote.dataChegada.split("T")[0];
@@ -84,8 +65,8 @@ export default function NovoLote() {
   };
 
   const handleSalvar = async () => {
-    if (!nome || !dataChegada || !quantidade || !linhagem || !finalidade || !animalId) {
-      Alert.alert("Atenção", "Por favor, preencha todos os campos e selecione o animal vinculado.");
+    if (!nome || !dataChegada || !quantidade || !finalidade) {
+      Alert.alert("Atenção", "Por favor, preencha todos os campos visíveis.");
       return;
     }
 
@@ -99,9 +80,8 @@ export default function NovoLote() {
         dataChegada: dataIso,
         quantidadeInicial: Number(quantidade),
         quantidadeAtual: Number(quantidade),
-        linhagem,
         finalidade,
-        animalId: Number(animalId), // Vincula obrigatoriamente o ID do animal selecionado
+        linhagem: "Não informada", // Manda um texto padrão para não quebrar a API
         ativo: true,
       };
 
@@ -136,32 +116,11 @@ export default function NovoLote() {
         <Text style={styles.label}>Nome de Identificação</Text>
         <TextInput
           style={styles.input}
-          placeholder="Ex: Galpão A"
+          placeholder="Ex: Galpão A - Frangos"
           placeholderTextColor="#666"
           value={nome}
           onChangeText={setNome}
         />
-
-        {/* SELETOR OBRIGATÓRIO DE ANIMAL/TIPO */}
-        <Text style={styles.label}>Vincular Animal / Tipo (Obrigatório)</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={animalId}
-            onValueChange={(itemValue) => setAnimalId(itemValue)}
-            style={styles.picker}
-            dropdownIconColor="#fff"
-          >
-            <Picker.Item label="Selecione o animal/tipo..." value="" color="#666" />
-            {animaisList.map((animal) => (
-              <Picker.Item
-                key={animal.id}
-                label={`${animal.name} (${animal.species || 'Geral'})`}
-                value={String(animal.id)}
-                color="#000"
-              />
-            ))}
-          </Picker>
-        </View>
 
         <View style={styles.row}>
           <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
@@ -189,19 +148,10 @@ export default function NovoLote() {
           </View>
         </View>
 
-        <Text style={styles.label}>Linhagem das Aves</Text>
+        <Text style={styles.label}>Finalidade (Opcional)</Text>
         <TextInput
           style={styles.input}
-          placeholder="Ex: Cobb"
-          placeholderTextColor="#666"
-          value={linhagem}
-          onChangeText={setLinhagem}
-        />
-
-        <Text style={styles.label}>Finalidade</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex: Corte"
+          placeholder="Ex: Corte, Postura, Engorda..."
           placeholderTextColor="#666"
           value={finalidade}
           onChangeText={setFinalidade}
@@ -238,19 +188,6 @@ const styles = StyleSheet.create({
     padding: 15,
     fontSize: 16,
     marginBottom: 20,
-  },
-  pickerContainer: {
-    backgroundColor: "#1e1e1e",
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 8,
-    marginBottom: 20,
-    justifyContent: "center",
-  },
-  picker: {
-    color: "#fff",
-    height: 50,
-    width: "100%",
   },
   row: { flexDirection: "row", justifyContent: "space-between" },
   inputContainer: { flexDirection: "column" },

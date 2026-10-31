@@ -220,7 +220,7 @@ export default function MortalidadeLote() {
         {/* Sumário de Perdas */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Total de Perdas Acumuladas</Text>
-          <Text style={styles.summaryValue}>{totalPerdas} aves</Text>
+          <Text style={styles.summaryValue}>{totalPerdas} Animais</Text>
         </View>
 
         <Text style={styles.sectionTitle}>Calendário de Mortalidade</Text>
@@ -267,7 +267,7 @@ export default function MortalidadeLote() {
                 </View>
               </View>
               <Text style={styles.quantityText}>
-                -{item.quantidadeAves} aves
+                -{item.quantidadeAves} Animais
               </Text>
             </TouchableOpacity>
           ))
@@ -289,7 +289,7 @@ export default function MortalidadeLote() {
               {selectedDate.split("-").reverse().join("/")}
             </Text>
 
-            <Text style={styles.label}>Quantidade de aves mortas</Text>
+            <Text style={styles.label}>Quantidade de animais mortos</Text>
             <TextInput
               style={styles.input}
               keyboardType="numeric"
