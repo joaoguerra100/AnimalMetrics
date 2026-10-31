@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AnimalMetrics.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9fc23abe220e963044e25a0ecc4b078ea9ad7778")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f570d6936d7efa64a3ac556e22b7b4de7412a218")]
 [assembly: System.Reflection.AssemblyProductAttribute("AnimalMetrics.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AnimalMetrics.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
