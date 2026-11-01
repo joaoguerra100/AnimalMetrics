@@ -112,7 +112,8 @@ export default function MeusLotes() {
           </Text>
           <Text style={styles.infoText}>
             <FontAwesome5 name="bullseye" size={14} color="#aaa" />{" "}
-            {item.finalidade} ({item.linhagem})
+            {item.finalidade} 
+            {item.linhagem && item.linhagem !== "Não informada" ? ` (${item.linhagem})` : ""}
           </Text>
         </View>
       </TouchableOpacity>

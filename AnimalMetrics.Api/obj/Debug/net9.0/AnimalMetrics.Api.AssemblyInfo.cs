@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("5cd4bd46-f58b-41a2-b2cc-7c65ba6972cc")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("AnimalMetrics.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f570d6936d7efa64a3ac556e22b7b4de7412a218")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7d4e8c92b5f83e27e56a81542524543f7e956b6f")]
 [assembly: System.Reflection.AssemblyProductAttribute("AnimalMetrics.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AnimalMetrics.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

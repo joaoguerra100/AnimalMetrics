@@ -8,6 +8,7 @@ namespace AnimalMetrics.Api.Models
         public int QuantidadeInicial { get; set; }
         public int QuantidadeAtual { get; set; }
         public string Linhagem { get; set; }
+        // depois colocar ponto de interrogaçao em finalidade para ser opicional
         public string Finalidade { get; set; }
         public bool Ativo { get; set; } = true;
         public decimal RationPrice { get; set; }
